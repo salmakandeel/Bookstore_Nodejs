@@ -3,12 +3,13 @@ const Book=require('../../models/book')
 
 const SearchFilter = require('../../utils/searchFilter');
 // Book limit per a page.
-const limit = 12;
+
 // get all books
 const getAllBooks=async (req,res)=>{
     try{
         let books;
-        if( req.headers.user )
+        const limit = req.params.limit;
+        if( limit )
             books = await Book.find().limit(limit); // User limit DB search.
         else
             books = await Book.find(); // Admin FULL DB Search
@@ -22,7 +23,8 @@ const getAllBooks=async (req,res)=>{
 }
 // get book by name
 const getBookByName=async (req,res)=>{
-    const bookSearch = req.params.id;
+    const bookSearch = String(req.params.id);
+    
     try{
         if( bookSearch.length < 2)
             return res.status(400).send( {Message: 'Book name is too short.'} );
@@ -41,7 +43,7 @@ const getBookByAuthorName=async (req,res)=>{
     const bookSearch = req.params.id;
     try{
         if( bookSearch.length < 2)
-            return res.status(400).send( {Message: 'Book name is too short.'} );
+            return res.status(400).send( {Message: 'Author name is too short.'} );
         const book = await Book.find( { author: bookSearch } );
         if( !book || book.length === 0 )
             return res.status(400).send( {Message:'Book not found.'} );
@@ -75,25 +77,5 @@ const getAllBooksBySpesficStart=async(req,res)=>{
         res.status(500).send(e);
     }
 }
-// get spesfic page from book
-// const getSpesficPage=async(req,res)=>{
-//     try{
-//         const page = req.params.id;
-//         if( page < 1 || page > 1000 || isNaN(page) )
-//             return res.status(400).send( {Message: 'Page out of boundaries.'} );
-//         const result = await Book.find();
-//         const books = [];
-//         if(result.length==0)
-//             return res.status(400).send( {Message: 'There are no Books in the store.'} );
-//         let skip = (page-1) * limit;
-//         for( let i = 0; skip < result.length && i < limit; skip++,i++)
-//             books[i] = result[skip];
-//         if( books.length === 0 )
-//             return res.status(400).send( {Message: 'Page out of boundaries.'} );
-//         res.send(books);
-//     }
-//     catch(e){
-//         res.status(500).send(e);
-//     }
-// }
+
 module.exports={getAllBooks,getBookByName,getBookByAuthorName,getAllBooksBySpesficStart}

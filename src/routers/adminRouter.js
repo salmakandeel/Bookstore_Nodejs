@@ -1,10 +1,11 @@
 
 const express = require('express');
-const { adminAuth } = require('../controller/authentication');
-const {addAdmin}=require('../middleware/Admin/addAdmin')
-const {login}=require('../middleware/Admin/login')
-const {verifyAdminToken}=require('../middleware/Admin/login')
-const {adminLogout}=require('../middleware/Admin/logout')
+const {  authenticateJWT  }= require('../middleware/authentication');
+const { authorizeRole  }= require('../middleware/authorization');
+const {addAdmin}=require('../Controller/Admin/addAdmin')
+const {login}=require('../Controller/Admin/login')
+const {verifyAdminToken}=require('../Controller/Admin/login')
+const {adminLogout}=require('../Controller/Admin/logout')
 
 
 
@@ -18,14 +19,14 @@ const router = express.Router();
 router.get('/admin/login',login);
 
 /**
- * Verifies admin token and sends back the ID.
+ * Verifies admin token and sends back the token.
  */
- router.get('/admin-verify-token', adminAuth, verifyAdminToken);
+ router.get('/admin/verify-token', authenticateJWT,authorizeRole('admin'), verifyAdminToken);
 
 /**
  * Logout {admin user by removing the token from the tokens array.
  */
- router.get('/admin/logout', adminLogout);
+ router.get('/admin/logout',authenticateJWT,authorizeRole('admin'), adminLogout);
 
 
 //****************************************************** POST REQUEST ******************************************************************** */

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://salmaredass29:HmXssjKWjf6yzcD7@cluster0.uiclhyv.mongodb.net/?appName=Cluster0";
+const uri = "mongodb+srv://salmaredass29:y71NZNA54YK0gO1p@cluster0.uiclhyv.mongodb.net/?appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {

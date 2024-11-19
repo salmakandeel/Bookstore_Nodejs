@@ -1,0 +1,24 @@
+const User=require("../models/user")
+const Admin=require("../models/admin")
+
+function authorizeRole(role) {
+
+  
+    return async (req, res, next) => {
+
+      
+      var savedRole=null
+      if(role == "user")
+{      const user =  await User.findUser( req.headers.token )
+  savedRole=user?user.role:null
+}      if(role == "admin")
+{        const admin =  await Admin.findAdmin( req.headers.token )
+   savedRole=admin?admin.role:null   
+}      if (savedRole == role) {
+        next();
+      } else {
+        res.status(401).send({  Message: 'Authorization is invalid.' })
+      }
+    };
+  }
+module.exports = { authorizeRole };

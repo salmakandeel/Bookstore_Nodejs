@@ -1,28 +1,29 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const emailRegex = /^(([^<>()\[\]\.,;:\s@"]+(\.[^<>()\[\]\.,;:\s@"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
         trim: true,
-        minlength: 2
+        minlength: [2,"Name must be at least 2 characters"]
+       
     },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
     email:{
         type: String,
         unique: true,
         required: true,
-        validate( isEmail ) { 
-            if( !validator.isEmail(isEmail) )
-                throw new Error('Invalid email');
-        }
+        validate: [ emailRegex, 'invalid email' ]
+
     },
     password:{
         type: String,
         required: true,
-        minlength: 6
+        minlength: [6,"Password must be at least 6 characters"]
+
     },
     tokens: [{
         token: {
@@ -54,10 +55,10 @@ userSchema.pre('save', async function (next) {
  * Generates a logging token for a user.
  * @returns String token.
  */
-userSchema.methods.generateToken = async function () {
-    const token = jwt.sign({ ID: this.ID }, '3000', { expiresIn: "1d" });
+userSchema.methods.generateToken =  function () {
+    const token =  jwt.sign({ ID: this.ID }, '3000', { expiresIn: "1d" });
     this.tokens = this.tokens.concat({ token });
-    await this.save();
+    
     return token;
 };
 
@@ -76,15 +77,7 @@ userSchema.statics.findUser = async ( token ) => {
     }
 }
 
-/**
- * Verifies the given token.
- * @param {User token} token 
- * @returns User ID.
- */
-userSchema.statics.verifyToken = async ( token ) => {
-    const decoded = jwt.verify(token, '3000');
-    return decoded
-}
+
 
 const User = mongoose.model('Users',userSchema);
 module.exports = User;

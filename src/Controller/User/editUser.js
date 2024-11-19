@@ -3,7 +3,7 @@ const User = require('../../models/user');
 const editUser=async(req,res)=>{
     try{
         const user = await User.findUser( req.headers.token );
-        const updateUser = req.body;
+        const updateUser = req.body;        
         if( !user )
             return res.status(400).send( { Error: 'User was not found. Please contact the management.'} );
         if( updateUser.name ){

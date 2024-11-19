@@ -1,13 +1,14 @@
 require('../db/mongoose');
 const express = require('express');
-const { adminAuth  }= require('../controller/authentication');
-const {getAllBooks }=require('../middleware/Book/getBooks')
-const {getBookByName }=require('../middleware/Book/getBooks')
-const {getBookByAuthorName }=require('../middleware/Book/getBooks')
-const {getAllBooksBySpesficStart }=require('../middleware/Book/getBooks')
-const {addBook} =require('../middleware/Book/addBook')
-const {deleteBook }=require('../middleware/Book/deleteBook')
-const {editBook }=require('../middleware/Book/editBook')
+const {  authenticateJWT  }= require('../middleware/authentication');
+const { authorizeRole  }= require('../middleware/authorization');
+const {getAllBooks }=require('../Controller/Book/getBooks')
+const {getBookByName }=require('../Controller/Book/getBooks')
+const {getBookByAuthorName }=require('../Controller/Book/getBooks')
+const {getAllBooksBySpesficStart }=require('../Controller/Book/getBooks')
+const {addBook} =require('../Controller/Book/addBook')
+const {deleteBook }=require('../Controller/Book/deleteBook')
+const {editBook }=require('../Controller/Book/editBook')
 
 const router=express.Router()
 //*****************************************************  GET REQUEST  ****************************************************************************/
@@ -15,21 +16,21 @@ const router=express.Router()
 /**
  * Sends all current existing books in the data base to the client.
  */
-router.get('/books',getAllBooks);
+router.get('/books',authenticateJWT,getAllBooks);
 
  /* Searches a book by given name and sends it to the client.
  */
-router.get('/books/name/:id',getBookByName);
+router.get('/books/name/:id',authenticateJWT,getBookByName);
 
 /**
  * Searches a book by author name and sends it to the client.
  */
-router.get('/books/author/:id', getBookByAuthorName);
+router.get('/books/author/:id',authenticateJWT, getBookByAuthorName);
 
 /**
  * Sends to the client all the books that starts with the request value inserted.
  */
- router.get('/books/search/:id', getAllBooksBySpesficStart);
+ router.get('/books/search/:id',authenticateJWT, getAllBooksBySpesficStart);
 
 
 
@@ -38,14 +39,14 @@ router.get('/books/author/:id', getBookByAuthorName);
 /**
  * Adds a book to the data base.
  */
- router.post('/books/add',adminAuth,addBook);
+ router.post('/books/add',authenticateJWT,authorizeRole('admin'),addBook);
 
 //*****************************************************  PATCH REQUEST  ****************************************************************************/
 
 /**
  * Change the data of book
  */
-router.patch('/books/edit/:id',adminAuth,editBook);
+router.patch('/books/edit/:id',authenticateJWT,authorizeRole('admin'),editBook);
 
 
 //*****************************************************  DELETE REQUEST  ****************************************************************************/
@@ -53,7 +54,7 @@ router.patch('/books/edit/:id',adminAuth,editBook);
 /**
  * Removes a book from the data base.
  */
- router.delete('/books/:id',adminAuth, deleteBook);
+ router.delete('/books/:id',authenticateJWT,authorizeRole('admin'),deleteBook);
 
 // For any other route
  router.get('*',async (req,res)=>{

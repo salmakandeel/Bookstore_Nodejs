@@ -1,22 +1,26 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const emailRegex = /^(([^<>()\[\]\.,;:\s@"]+(\.[^<>()\[\]\.,;:\s@"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const adminSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        minlength: [2,"Name must be at least 2 characters"]
+        
     },
+    role: { type: String, enum: ['admin', 'admin'], default: 'admin' },
     email: {
         type: String,
-        required: true
+        unique: true,
+        required: true,
+        validate: [ emailRegex, 'invalid email' ]
     },
     password: {
         type: String,
         required: true,
-        minlength: 6,
-        validate: [
-            { validator: (value) => value.length >= 6, msg: 'Password must be at least 6 characters' },
-        ]
+       minlength: [6,"Password must be at least 6 characters"]
     },
     tokens: [{
         token: {
@@ -48,16 +52,26 @@ adminSchema.methods.generateToken = async function () {
     await this.save();
     return token;
 };
-
+/**
+ * Finds the admin who holds the given token.
+ * @param {Admin token} token 
+ * @returns admin object or undefined
+ */
+adminSchema.statics.findAdmin = async ( token ) => {
+    const admins = await Admin.find({});
+    for(let i = 0; i < admins.length; i++){
+        for(let j = 0; j < admins[i].tokens.length; j++){
+            if( token === admins[i].tokens[j].token )
+                return admins[i];
+        }
+    }
+}
 /**
  * Verifies the given token.
  * @param {Admin token} token 
  * @returns Admin ID
  */
-adminSchema.statics.verifyToken = async ( token ) => {
-    const decoded = jwt.verify(token, '3000');
-    return decoded
-}
+
 
 const Admin = mongoose.model('Admins', adminSchema);
 module.exports = Admin;

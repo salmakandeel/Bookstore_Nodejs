@@ -5,7 +5,7 @@ const deleteBook=async (req,res)=>{
         const deletedBook = await Book.findOneAndDelete( {name: bookName} );
         if( !deletedBook )
             return res.status(400).send( {Message: 'Book not found.'});
-        res.send( {deletedBook});
+        res.send( {Message: 'Book is deleted successfully!.'});
     }
     catch(e){
         res.status(500).send(e);
